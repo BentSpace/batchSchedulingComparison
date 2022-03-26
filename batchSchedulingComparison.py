@@ -31,6 +31,29 @@ def main():
       print("\nScheduling algorithm must be FCFS, ShortestFirst or Priority," + 
         " please try again.\n")
       quit()
+
+  # Call the chosen Algo
+  if (algoName == "FCFS"):
+    FirstComeFirstServedSort(batchFileDataList)
+  if (algoName == "ShortestFisrt"):
+    ShortestJobFirst(batchFileDataList)
+  if (algoName == "Priorty"):
+    PrioritySort(batchFileDataList)
+
   
+def AverageTurnaround(processCompletionTimes, processArrivalTimes):
+  pass
+
+def AverageWait(processTurnaroundTimes, processBurstTime):
+  pass
+
+def FirstComeFirstServedSort(batchFileData):
+  pass
+
+def ShortestJobFirst(batchFileData):
+  pass
+
+def PrioritySort(batchFileData):
+  pass
 if __name__== "__main__":
   main()
