@@ -25,21 +25,8 @@ def main():
   # Open batch file
   batchFile = open(os.path.join(__location__, batchFileName), 'r')
   batchFileDataList = batchFile.readlines()
-
-  # Convert to list of lists
-  process = 0
-  while process < len(batchFileDataList):
-    # Strip out newlines
-    batchFileDataList[process] = batchFileDataList[process].strip()
-    # Split into list
-    batchFileDataList[process] = batchFileDataList[process].split(",")
-    # Convert all strings to ints
-    item = 0
-    while item < 4:
-      batchFileDataList[process][item] = int(batchFileDataList[process][item])
-      item += 1
-    process += 1
-
+  batchFileDataListOfDicts = [] 
+  
   # Check Algo name
   algoName = sys.argv[2]
   if (not (algoName == "FCFS" or algoName == "ShortestFirst" or 
@@ -48,16 +35,51 @@ def main():
         " please try again.\n")
       quit()
 
+  # Convert to list of lists
+  i = 0
+  while i < len(batchFileDataList):
+    process = batchFileDataList[i]
+    # Strip out newlines
+    process = process.strip()
+    # Split into list
+    process = process.split(",")
+    # Convert all strings to ints
+    item = 0
+    while item < 4:
+      process[item] = int(process[item])
+      item += 1
+    processDict = {
+      "PID": process[0],
+      "Arrival Time": process[1],
+      "Burst Time": process[2],
+      "Priority": process[3] 
+    }
+    batchFileDataListOfDicts.append(processDict)
+    i += 1
+
   # Call the chosen Algo
   if (algoName == "FCFS"):
-    timeProcessCompletedList, PIDsCompletedList = \
-      FirstComeFirstServedSort(batchFileDataList)
+    processCompletionTimes, PIDsCompletedList = \
+      FirstComeFirstServedSort(batchFileDataListOfDicts)
   if (algoName == "ShortestFirst"):
     ShortestJobFirst(batchFileDataList)
   if (algoName == "Priorty"):
     PrioritySort(batchFileDataList)
 
-  
+  # Make list of arrival times
+  # for process in 
+
+  print("\nPID ORDER OF EXECUTION\n")
+  for PID in PIDsCompletedList:
+    print(str(PID) + "\n")
+
+# AverageTurnaround(processCompletionTimes, processArrivalTimes)
+# Parameters:
+# accepts the time that the process would be completed at by the algorithm, 
+# accepts the time that each process arrives
+# Returns: 
+# (1)the average turn around, 
+# (2)a list of each process turn around times
 def AverageTurnaround(processCompletionTimes, processArrivalTimes):
   pass
 
@@ -75,23 +97,24 @@ def AverageWait(processTurnaroundTimes, processBurstTime):
 # 2: list containing the PID of the processes in the order the algorithm sorted
 def FirstComeFirstServedSort(batchFileData):
   # First sort by PID
-  batchFileData = sorted(batchFileData, key=lambda x:x[0])
+  batchFileData = sorted(batchFileData, key=lambda x:x['PID'])
   # Then sort by arrival time
-  batchFileData = sorted(batchFileData, key=lambda x:x[1])
+  batchFileData = sorted(batchFileData, key=lambda x:x['Arrival Time'])
   # Now is order of execution
   time = 0
   process = 0
   numProcesses = len(batchFileData)
-  timeProcessCompletedList = []
+  processCompletionTimes = []
   PIDsCompletedList = []
   while process < numProcesses:
-    burstTime = batchFileData[process][2]
-    time += burstTime
-    timeProcessCompletedList.append(time)
-    PID = batchFileData[process][0]
-    PIDsCompletedList.append(PID)
+    currentProcess = batchFileData[process]
+    if time < currentProcess["Arrival Time"]:
+      time = currentProcess["Arrival Time"]
+    time += currentProcess["Burst Time"]
+    processCompletionTimes.append(time)
+    PIDsCompletedList.append(currentProcess["PID"])
     process += 1
-  return timeProcessCompletedList, PIDsCompletedList
+  return processCompletionTimes, PIDsCompletedList
 
 # Returns list of the times each process is completed at
 def ShortestJobFirst(batchFileData):
