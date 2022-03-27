@@ -1,4 +1,5 @@
 from ast import For
+from concurrent.futures import process
 import sys
 import os
 
@@ -32,6 +33,11 @@ def main():
     batchFileDataList[process] = batchFileDataList[process].strip()
     # Split into list
     batchFileDataList[process] = batchFileDataList[process].split(",")
+    # Convert all strings to ints
+    item = 0
+    while item < 4:
+      batchFileDataList[process][item] = int(batchFileDataList[process][item])
+      item += 1
     process += 1
 
   # Check Algo name
@@ -44,7 +50,8 @@ def main():
 
   # Call the chosen Algo
   if (algoName == "FCFS"):
-    FirstComeFirstServedSort(batchFileDataList)
+    timeProcessCompletedList, PIDsCompletedList = \
+      FirstComeFirstServedSort(batchFileDataList)
   if (algoName == "ShortestFirst"):
     ShortestJobFirst(batchFileDataList)
   if (algoName == "Priorty"):
@@ -57,11 +64,34 @@ def AverageTurnaround(processCompletionTimes, processArrivalTimes):
 def AverageWait(processTurnaroundTimes, processBurstTime):
   pass
 
-# Returns 
+# FirstComeFirstServedSort(batchFileData)
+# Schedules processes by executing the ones with earliest arrival time first
+# If two have the same arrival time, process in order of PID
+# Parameter:
+# a list of processes, each a list containing PID, Arrival Time, 
+# Burst Time, and Priority
+# Returns:
 # 1: list of the times each process is completed at
 # 2: list containing the PID of the processes in the order the algorithm sorted
 def FirstComeFirstServedSort(batchFileData):
-  pass
+  # First sort by PID
+  batchFileData = sorted(batchFileData, key=lambda x:x[0])
+  # Then sort by arrival time
+  batchFileData = sorted(batchFileData, key=lambda x:x[1])
+  # Now is order of execution
+  time = 0
+  process = 0
+  numProcesses = len(batchFileData)
+  timeProcessCompletedList = []
+  PIDsCompletedList = []
+  while process < numProcesses:
+    burstTime = batchFileData[process][2]
+    time += burstTime
+    timeProcessCompletedList.append(time)
+    PID = batchFileData[process][0]
+    PIDsCompletedList.append(PID)
+    process += 1
+  return timeProcessCompletedList, PIDsCompletedList
 
 # Returns list of the times each process is completed at
 def ShortestJobFirst(batchFileData):
