@@ -12,7 +12,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "batch2.txt",
+                "pa2_batchfile.txt",
                 "FCFS"
             ]
         }

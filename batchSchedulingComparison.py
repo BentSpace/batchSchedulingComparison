@@ -26,6 +26,8 @@ def main():
   batchFile = open(os.path.join(__location__, batchFileName), 'r')
   batchFileDataList = batchFile.readlines()
   batchFileDataListOfDicts = [] 
+  arrivalTimes = []
+  burstTimes = []
   
   # Check Algo name
   algoName = sys.argv[2]
@@ -62,16 +64,28 @@ def main():
     processCompletionTimes, PIDsCompletedList = \
       FirstComeFirstServedSort(batchFileDataListOfDicts)
   if (algoName == "ShortestFirst"):
-    ShortestJobFirst(batchFileDataList)
+    ShortestJobFirst(batchFileDataListOfDicts)
   if (algoName == "Priorty"):
-    PrioritySort(batchFileDataList)
+    PrioritySort(batchFileDataListOfDicts)
 
   # Make list of arrival times
-  # for process in 
+  for process in batchFileDataListOfDicts:
+    arrivalTimes.append(process["Arrival Time"])
+
+  # Make list of burst times
+  for process in batchFileDataListOfDicts:
+    burstTimes.append(process["Burst Time"])
+
+  averageTurnAroundTime, turnAroundTimes = \
+    AverageTurnaround(processCompletionTimes, arrivalTimes)
+
+  averageWaitTime = AverageWait(turnAroundTimes, burstTimes)
 
   print("\nPID ORDER OF EXECUTION\n")
   for PID in PIDsCompletedList:
     print(str(PID) + "\n")
+  print("Average Process Turnaround Time: " + str(averageTurnAroundTime))
+  print("Average Process Wait Time: " + str(averageWaitTime))
 
 # AverageTurnaround(processCompletionTimes, processArrivalTimes)
 # Parameters:
@@ -81,10 +95,38 @@ def main():
 # (1)the average turn around, 
 # (2)a list of each process turn around times
 def AverageTurnaround(processCompletionTimes, processArrivalTimes):
-  pass
+  process = 0
+  numProcesses = len(processCompletionTimes)
+  turnAroundTimes = []
+  while process < numProcesses:
+    turnAroundTimes.append(processCompletionTimes[process] - 
+      processArrivalTimes[process])
+    process += 1
+  total = 0
+  for turnAroundTime in turnAroundTimes:
+    total += turnAroundTime
+  averageTurnAroundTime = total / numProcesses
+  return averageTurnAroundTime, turnAroundTimes
 
+# AverageWait(processTurnaroundTimes, processBurstTime)
+# Parameters: 
+# accepts the list of process turnaround times that is returned by 
+# AverageTurnaround, accepts the burst time of each process
+# Returns: 
+# (1)AverageWait
 def AverageWait(processTurnaroundTimes, processBurstTime):
-  pass
+  process = 0
+  numProcesses = len(processTurnaroundTimes)
+  waitTimes = []
+  while process < numProcesses:
+    waitTimes.append(processTurnaroundTimes[process] - 
+      processBurstTime[process])
+    process += 1
+  total = 0
+  for waitTime in waitTimes:
+    total += waitTime
+  averageWaitTime = total / numProcesses
+  return averageWaitTime
 
 # FirstComeFirstServedSort(batchFileData)
 # Schedules processes by executing the ones with earliest arrival time first
@@ -97,9 +139,11 @@ def AverageWait(processTurnaroundTimes, processBurstTime):
 # 2: list containing the PID of the processes in the order the algorithm sorted
 def FirstComeFirstServedSort(batchFileData):
   # First sort by PID
-  batchFileData = sorted(batchFileData, key=lambda x:x['PID'])
+  # batchFileData = sorted(batchFileData, key=lambda x:x['PID'])
+  batchFileData.sort(key=lambda x:x['PID'])
   # Then sort by arrival time
-  batchFileData = sorted(batchFileData, key=lambda x:x['Arrival Time'])
+  # batchFileData = sorted(batchFileData, key=lambda x:x['Arrival Time'])
+  batchFileData.sort(key=lambda x:x['Arrival Time'])
   # Now is order of execution
   time = 0
   process = 0
@@ -116,7 +160,14 @@ def FirstComeFirstServedSort(batchFileData):
     process += 1
   return processCompletionTimes, PIDsCompletedList
 
-# Returns list of the times each process is completed at
+
+# ShortestJobFirst(batchFileData)
+# Parameters: 
+# accepts all of the batchFileData from the batchfile opened in main
+# Returns: 
+# (1) a list  of the time each process is completed at
+# (2) a list containing the PID of the processes in the order the algorithm 
+# sorted them by.
 def ShortestJobFirst(batchFileData):
   pass
 
