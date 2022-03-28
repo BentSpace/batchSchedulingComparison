@@ -1,5 +1,12 @@
-from ast import For
-from concurrent.futures import process
+# batchSchedulingComparision
+# by: Nathan Bertram
+# CS 446
+# Compares three scheduling algorithms.  First come first served, Shortest Job
+# First and Priority.
+# Takes two arguement.  First the batch filename you wish to use, with the 
+# following information PID, Arrival Time, Burst Time, and Priority seperated by
+# commas.  Each process on it's own line.
+
 import sys
 import os
 import copy
@@ -60,6 +67,11 @@ def main():
     batchFileDataListOfDicts.append(processDict)
     i += 1
 
+  # First sort by PID
+  batchFileDataListOfDicts.sort(key=lambda x:x['PID'])
+  # Then sort by arrival time
+  batchFileDataListOfDicts.sort(key=lambda x:x['Arrival Time'])
+
   # Call the chosen Algo
   if (algoName == "FCFS"):
     processCompletionTimes, executionOrderList = \
@@ -67,8 +79,9 @@ def main():
   if (algoName == "ShortestFirst"):
     processCompletionTimes, executionOrderList = \
       ShortestJobFirst(batchFileDataListOfDicts)
-  if (algoName == "Priorty"):
-    PrioritySort(batchFileDataListOfDicts)
+  if (algoName == "Priority"):
+    processCompletionTimes, executionOrderList = \
+      PrioritySort(batchFileDataListOfDicts)
 
   # Make list of arrival times
   for process in batchFileDataListOfDicts:
@@ -140,13 +153,6 @@ def AverageWait(processTurnaroundTimes, processBurstTime):
 # 1: list of the times each process is completed at
 # 2: list containing the PID of the processes in the order the algorithm sorted
 def FirstComeFirstServedSort(batchFileData):
-  # First sort by PID
-  # batchFileData = sorted(batchFileData, key=lambda x:x['PID'])
-  batchFileData.sort(key=lambda x:x['PID'])
-  # Then sort by arrival time
-  # batchFileData = sorted(batchFileData, key=lambda x:x['Arrival Time'])
-  batchFileData.sort(key=lambda x:x['Arrival Time'])
-  # Now is order of execution
   time = 0
   process = 0
   numProcesses = len(batchFileData)
@@ -171,13 +177,6 @@ def FirstComeFirstServedSort(batchFileData):
 # (2) a list containing the PID of the processes in the order the algorithm 
 # sorted them by.
 def ShortestJobFirst(batchFileData):
-  # First sort by PID
-  # batchFileData = sorted(batchFileData, key=lambda x:x['PID'])
-  batchFileData.sort(key=lambda x:x['PID'])
-  # Then sort by arrival time
-  # batchFileData = sorted(batchFileData, key=lambda x:x['Arrival Time'])
-  batchFileData.sort(key=lambda x:x['Arrival Time'])
-
   time = 0
   processesCompleted = 0
   numProcesses = len(batchFileData)
@@ -229,11 +228,74 @@ def ShortestJobFirst(batchFileData):
   return processCompletionTimes, executionOrderList
 
 # PrioritySort(batchFileData)
-# Parameters: accepts all of the batchFileData from the batchfile opened in main
-# Returns: (1)a list (or other data structure) of the time each process is completed at, and (2) a list (or
-# other data structure) containing the PID of the processes in the order the algorithm sorted them by.
+# Parameters: 
+# accepts all of the batchFileData from the batchfile opened in main
+# Returns: 
+# (1)a list of the time each process is completed at, and 
+# (2) a list containing the PID of the processes in the order the algorithm 
+# sorted them by.
 def PrioritySort(batchFileData):
-  pass
+  time = 0
+  processesCompleted = 0
+  numProcesses = len(batchFileData)
+  notComplete = True
+  processQueue = []
+  tempQueue = []
+  executionOrderList = []
+  # Completion Times in new sorted order of batchFileData
+  processCompletionTimes = [] 
+
+  # At each time
+  while notComplete:
+    # If a process's arrival time equals the current time added to the queue
+    for process in batchFileData:
+      if process["Arrival Time"] == time:
+        processCopy = copy.deepcopy(process)
+        tempQueue.append(processCopy)
+
+    # Sort Temp Queue by PID
+    tempQueue.sort(key=lambda x:x['PID'])
+    # Sort Temp Queue by Priority
+    tempQueue.sort(key=lambda x:x['Priority'])
+
+    # Add tempQueue to actual queue
+    while tempQueue:
+      processQueue.append(tempQueue.pop(0))
+
+
+    # If the process of the front of the queue has zero time remaining save 
+    # completion time  and pop it off the queue 
+    if processQueue[0]["Burst Time"] == 0:
+      # Find element in batchFileData matching PID
+      PID = processQueue[0]["PID"]
+      matchingProcess = next(x for x in batchFileData if x["PID"] == PID)
+      matchingProcess["Completion Time"] = time
+
+      processQueue.pop(0)
+      processesCompleted += 1
+
+    # If the process at front of queue is not the last executed one then add to 
+    # execution list
+    if processQueue:
+      executingProccessPID = processQueue[0]["PID"]
+    if not executionOrderList:
+      executionOrderList.append(executingProccessPID)
+    elif executionOrderList[-1] != executingProccessPID:
+      executionOrderList.append(executingProccessPID)
+
+    # Decrement the process's at the front of the queue's remaining time by one
+    if processQueue:
+     processQueue[0]["Burst Time"] = processQueue[0]["Burst Time"] - 1
+    
+    # Check if all process's have completed
+    if processesCompleted == numProcesses:
+      notComplete = False
+    time += 1 
+  for process in batchFileData:
+    processCompletionTimes.append(process["Completion Time"])
+  return processCompletionTimes, executionOrderList
+
+
 
 if __name__== "__main__":
   main()
