@@ -13,7 +13,7 @@
             "justMyCode": true,
             "args": [
                 "pa2_batchfile.txt",
-                "FCFS"
+                "ShortestFirst"
             ]
         }
     ]
