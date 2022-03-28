@@ -3,9 +3,18 @@
 # CS 446
 # Compares three scheduling algorithms.  First come first served, Shortest Job
 # First and Priority.
-# Takes two arguement.  First the batch filename you wish to use, with the 
+# Takes two arguements.  First the batch filename you wish to use, with the 
 # following information PID, Arrival Time, Burst Time, and Priority seperated by
 # commas.  Each process on it's own line.
+#
+# Compare and Constrast
+# In the sample batch file provided, Shortest Job First had the fastest average 
+# turnaroud time and shortest average wait time.  So if that is representative
+# of normal and if those two traits are most important to you, then that one 
+# would be the best.  First come first served certainly is the simpliest to 
+# implement and may gain some speed from lesser overhead. Priority would make 
+# sense for a system where certain processes are more important to be processed
+# sooner than other processes.
 
 import sys
 import os
